@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "build:static": "shx cp -r static/. dist",
+    "build:src": "esbuild src/index.ts --bundle --minify --outfile=dist/index.js",
+    "build": "npm run build:static && npm run build:src"
+  },
+  "dependencies": {
+    "esbuild": "0.17.15",
+    "shx": "0.3.4"
+  }
+}
