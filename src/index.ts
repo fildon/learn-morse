@@ -8,6 +8,9 @@ const buttonB = document.getElementById("B")!;
 const buttonC = document.getElementById("C")!;
 const buttonD = document.getElementById("D")!;
 const previousResult = document.getElementById("previousResult")!;
+const feedback = document.getElementById("feedback")!;
+const previousQuestion = document.getElementById("previousQuestion")!;
+const previousAnswer = document.getElementById("previousAnswer")!;
 
 let state = initializeState();
 
@@ -33,10 +36,11 @@ renderState(state);
 // Bind event listeners
 [buttonA, buttonB, buttonC, buttonD].forEach((button) =>
   button.addEventListener("click", () => {
+    previousResult.style.display = "block";
     const isCorrect = button.textContent === state.currentCard.answer;
-    previousResult.textContent = `${isCorrect ? "Yes!" : "No."} ${
-      state.currentCard.question
-    } is ${state.currentCard.answer}`;
+    feedback.textContent = `${isCorrect ? "Yes!" : "No."}`;
+    previousQuestion.textContent = state.currentCard.question;
+    previousAnswer.textContent = state.currentCard.answer;
     state = advanceState(state, isCorrect ? "correct" : "incorrect");
     renderState(state);
   })

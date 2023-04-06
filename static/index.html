@@ -7,17 +7,35 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0"
     />
+    <link rel="stylesheet" href="styles.css" />
     <title>Learn Morse</title>
   </head>
   <body>
     <h1>Learn Morse</h1>
     <main>
-      <p id="question"></p>
-      <button id="A">A</button>
-      <button id="B">B</button>
-      <button id="C">C</button>
-      <button id="D">D</button>
-      <p id="previousResult"></p>
+      <h2>What letter or number is this?</h2>
+      <p id="question" class="morse"></p>
+      <h2>Possible answers:</h2>
+      <button id="A"></button>
+      <button id="B"></button>
+      <button id="C"></button>
+      <button id="D"></button>
+      <section id="previousResult" style="display: none">
+        <h2>Previous result</h2>
+        <span id="feedback"></span>
+        <span id="previousQuestion" class="morse"></span>
+        <span>is</span>
+        <span id="previousAnswer"></span>
+      </section>
+      <details>
+        <summary>What is webpage?</summary>
+        This webpage is intended to teach you
+        <a href="https://en.m.wikipedia.org/wiki/Morse_code"
+          >Morse Code</a
+        >
+        using a spaced repetition system. You'll be shown a Morse Code
+        sequence and must press the button which matches.
+      </details>
     </main>
   </body>
   <footer>
