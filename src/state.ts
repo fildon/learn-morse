@@ -27,19 +27,32 @@ export type State = {
  * Given a state and a correct or incorrect answer, returns a new updated state
  */
 export const advanceState = (
-  state: State,
+  { currentCard, otherCards }: State,
   answer: "correct" | "incorrect"
 ): State => {
-  // TODO update the state of the current card
-  // TODO fetch the next card to test
+  const updatedCard: StatefulCard = {
+    ...currentCard,
+    streak: answer === "correct" ? currentCard.streak + 1 : 0,
+  };
+
+  // TODO some kind of shuffled weighted thing?
+  const shuffledOthers = shuffle(otherCards);
+
   // TODO persist updated state to localStorage
-  // TODO return updated state
-  return initializeState();
+  return {
+    currentCard: shuffledOthers[0],
+    wrongAnswers: [
+      shuffledOthers[1].answer,
+      shuffledOthers[2].answer,
+      shuffledOthers[3].answer,
+    ],
+    otherCards: [...shuffledOthers.slice(1), updatedCard],
+  };
 };
 
 const initializeCard = (card: BareCard): StatefulCard => ({
   ...card,
-  box: 0,
+  streak: 0,
 });
 
 export const initializeState = (): State => {
@@ -54,4 +67,17 @@ export const initializeState = (): State => {
     ],
     otherCards: initializedCards.slice(1),
   };
+};
+
+export const getLearningProgress = ({
+  currentCard,
+  otherCards,
+}: State): number => {
+  const cards = [currentCard, ...otherCards];
+  const averageLearning =
+    cards
+      // We treat a streak of 7 or more as 100% learnt
+      .map(({ streak }) => Math.min(streak, 7) / 7)
+      .reduce((acc, curr) => acc + curr) / cards.length;
+  return averageLearning;
 };

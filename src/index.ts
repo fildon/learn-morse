@@ -1,4 +1,4 @@
-import { type State, initializeState, advanceState } from "./state";
+import { type State, initializeState, advanceState, getLearningProgress } from "./state";
 import { shuffle } from "./utils";
 
 // Find interactive elements
@@ -11,6 +11,7 @@ const previousResult = document.getElementById("previousResult")!;
 const feedback = document.getElementById("feedback")!;
 const previousQuestion = document.getElementById("previousQuestion")!;
 const previousAnswer = document.getElementById("previousAnswer")!;
+const progress = document.getElementById("progress") as HTMLProgressElement;
 
 let state = initializeState();
 
@@ -23,11 +24,17 @@ const renderState = (state: State): void => {
     state.currentCard.answer,
     ...state.wrongAnswers,
   ]);
+
   // Display the possible answers
   buttonA.textContent = a;
   buttonB.textContent = b;
   buttonC.textContent = c;
   buttonD.textContent = d;
+  
+  // Progress update
+  const progressValue = getLearningProgress(state);
+  progress.value = progressValue * 100;
+  progress.textContent = `${progressValue * 100}%`;
 };
 
 // Initial render

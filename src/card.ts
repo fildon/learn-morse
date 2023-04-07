@@ -7,10 +7,15 @@ export type BareCard = {
 };
 
 /**
- * A flash card which remembers which box it is in
+ * A flash card which remembers the current correct streak
  */
 export type StatefulCard = BareCard & {
-  box: number;
+  /**
+   * How many times has the card been answered correctly without mistake?
+   * 
+   * Any incorrect answer resets this to zero
+   */
+  streak: number;
 };
 
 export const allCards: BareCard[] = [
