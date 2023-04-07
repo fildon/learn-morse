@@ -12,11 +12,22 @@ export type BareCard = {
 export type StatefulCard = BareCard & {
   /**
    * How many times has the card been answered correctly without mistake?
-   * 
+   *
    * Any incorrect answer resets this to zero
    */
   streak: number;
 };
+
+const isUnknownObject = (
+  x: unknown
+): x is Record<PropertyKey, unknown> =>
+  x !== null && typeof x === "object";
+
+export const isStatefulCard = (x: unknown): x is StatefulCard =>
+  isUnknownObject(x) &&
+  typeof x.question === "string" &&
+  typeof x.answer === "string" &&
+  typeof x.streak === "number";
 
 export const allCards: BareCard[] = [
   { question: "● ▀▀▀", answer: "A" },
