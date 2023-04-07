@@ -22,9 +22,9 @@ export const createStorageModule = ({
   setItem,
 }: Pick<Storage, "getItem" | "setItem">) => ({
   writeStatefulCardsToStore: (cards: StatefulCard[]): void =>
-    setItem("state", JSON.stringify(cards)),
+    setItem("cards", JSON.stringify(cards)),
   readStatefulCardsFromStore: (): StatefulCard[] => {
-    const stored = getItem("state");
+    const stored = getItem("cards");
 
     // Nothing found in storage
     if (stored === null) return initializeCards();
