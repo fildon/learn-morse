@@ -96,16 +96,32 @@ export const completeLesson = (
   nextLesson: Lesson;
   feedbackMessage: string;
 } => {
-  const isCorrectAnswer = submittedAnswer === quizCard.answer;
+  const isCorrectAnswer =
+    submittedAnswer.toLocaleLowerCase() ===
+    quizCard.answer.toLocaleLowerCase();
 
   const updatedQuizCard: StatefulCard = {
     ...quizCard,
     streak: isCorrectAnswer ? quizCard.streak + 1 : 0,
   };
 
-  const updatedCards = cards.map((card) =>
-    card.question === quizCard.question ? updatedQuizCard : card
-  );
+  const updatedCards = cards.map((card) => {
+    // Update the quiz card
+    if (card.question === quizCard.question) {
+      return {
+        ...quizCard,
+        streak: isCorrectAnswer ? quizCard.streak + 1 : 0,
+      };
+    }
+
+    // If the submitted answer was wrong, we also reset the streak on the card matching the submitted answer.
+    if (!isCorrectAnswer && card.answer === submittedAnswer) {
+      return { ...card, streak: 0 };
+    }
+
+    // Otherwise, no need to update this card
+    return card;
+  });
 
   // Avoid showing the same quiz card twice in a row
   const nextLesson = getLesson(
@@ -115,7 +131,9 @@ export const completeLesson = (
   return {
     updatedCards,
     nextLesson,
-    feedbackMessage: isCorrectAnswer ? "Yes!" : "No.",
+    feedbackMessage: isCorrectAnswer
+      ? "Yes!"
+      : `No. Not: "${submittedAnswer.toLocaleUpperCase()}"`,
   };
 };
 

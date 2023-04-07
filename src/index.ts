@@ -1,4 +1,4 @@
-import { type BareCard, type StatefulCard } from "./card";
+import { allCards, type BareCard, type StatefulCard } from "./card";
 import {
   completeLesson,
   getLearningProgress,
@@ -63,30 +63,41 @@ const renderProgress = (cards: StatefulCard[]) => {
   progress.textContent = `${progressValue * 100}%`;
 };
 
+const submitAnswer = (answer: BareCard["answer"]) => {
+  const { updatedCards, nextLesson, feedbackMessage } =
+    completeLesson(currentCards, currentLesson.quizCard, answer);
+
+  // Update UI
+  renderLesson(nextLesson);
+  renderPreviousResult(currentLesson.quizCard, feedbackMessage);
+  renderProgress(updatedCards);
+
+  // Update in memory state
+  currentCards = updatedCards;
+  currentLesson = nextLesson;
+
+  // Update persisted state
+  storageModule.writeStatefulCardsToStore(updatedCards);
+};
+
 // Initial render
 renderLesson(currentLesson);
 renderProgress(currentCards);
 
 // Bind event listeners
 [buttonA, buttonB, buttonC, buttonD].forEach((button) =>
-  button.addEventListener("click", () => {
-    const { updatedCards, nextLesson, feedbackMessage } =
-      completeLesson(
-        currentCards,
-        currentLesson.quizCard,
-        button.textContent!
-      );
-
-    // Update UI
-    renderLesson(nextLesson);
-    renderPreviousResult(currentLesson.quizCard, feedbackMessage);
-    renderProgress(updatedCards);
-
-    // Update in memory state
-    currentCards = updatedCards;
-    currentLesson = nextLesson;
-
-    // Update persisted state
-    storageModule.writeStatefulCardsToStore(updatedCards);
-  })
+  button.addEventListener("click", () =>
+    submitAnswer(button.textContent!)
+  )
 );
+
+document.addEventListener("keyup", ({ key }) => {
+  if (
+    allCards.some(
+      (card) =>
+        card.answer.toLocaleLowerCase() === key.toLocaleLowerCase()
+    )
+  ) {
+    submitAnswer(key);
+  }
+});
