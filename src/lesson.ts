@@ -73,7 +73,11 @@ const getWrongAnswers = (
   quizCard: StatefulCard
 ): Lesson["wrongAnswers"] => {
   const [wrong1, wrong2, wrong3] = sortBy(
-    cards.filter((card) => card.question !== quizCard.question),
+    cards.filter(
+      (card) =>
+        card.question !== quizCard.question &&
+        card.tag === quizCard.tag
+    ),
     // Sort cards by proximity to correct answer, with a little randomness for fun.
     (card) => Math.abs(card.streak - quizCard.streak) + Math.random()
   ).map(({ answer }) => answer);

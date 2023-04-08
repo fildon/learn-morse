@@ -10,10 +10,7 @@ import { shuffle } from "./utils";
 
 // Find interactive elements
 const queryDisplay = document.getElementById("question")!;
-const buttonA = document.getElementById("A")!;
-const buttonB = document.getElementById("B")!;
-const buttonC = document.getElementById("C")!;
-const buttonD = document.getElementById("D")!;
+const buttons = document.getElementsByTagName("button");
 const previousResult = document.getElementById("previousResult")!;
 const feedback = document.getElementById("feedback")!;
 const previousQuestion = document.getElementById("previousQuestion")!;
@@ -38,10 +35,10 @@ const renderLesson = ({ quizCard, wrongAnswers }: Lesson): void => {
   const [a, b, c, d] = shuffle([quizCard.answer, ...wrongAnswers]);
 
   // Display the possible answers
-  buttonA.textContent = a;
-  buttonB.textContent = b;
-  buttonC.textContent = c;
-  buttonD.textContent = d;
+  buttons[0].textContent = a;
+  buttons[1].textContent = b;
+  buttons[2].textContent = c;
+  buttons[3].textContent = d;
 };
 
 const renderPreviousResult = (
@@ -88,7 +85,7 @@ renderLesson(currentLesson);
 renderProgress(currentCards);
 
 // Bind event listeners
-[buttonA, buttonB, buttonC, buttonD].forEach((button) =>
+[...buttons].forEach((button) =>
   button.addEventListener("click", () =>
     submitAnswer(button.textContent!)
   )
