@@ -60,7 +60,10 @@ const renderPreviousResult = (
 const renderProgress = (cards: StatefulCard[]) => {
   const progressValue = getLearningProgress(cards);
   progress.value = progressValue * 100;
-  progress.textContent = `${progressValue * 100}%`;
+  // We use a little rounding trick here to display only 2 decimal places
+  progress.textContent = `${
+    Math.round(progressValue * 10000) / 100
+  }%`;
 };
 
 const submitAnswer = (answer: BareCard["answer"]) => {

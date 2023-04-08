@@ -3,13 +3,17 @@
   max-width: 60ch;
 }
 
-* + * {
+body > * + * {
   margin-block-start: 1rem;
 }
 
 button {
-  padding: 1rem;
+  padding: 2rem;
   font-family: monospace;
+}
+
+button + button {
+  margin-inline-start: 2rem;
 }
 
 .morse {
