@@ -1,5 +1,5 @@
 import { type StatefulCard, type BareCard } from "./card";
-import { shuffle } from "./utils";
+import { pickRandom, shuffle, sortBy } from "./utils";
 
 /**
  * A single lesson. Typically the current lesson.
@@ -19,68 +19,73 @@ export type Lesson = {
   ];
 };
 
-/**
- * Assign a weight to a card.
- *
- * Lower streak has higher weight.
- *
- * Each weight class is double/half the weight of the class above/below
- */
-const toWeightedCard = (
-  card: StatefulCard
-): { card: StatefulCard; weight: number } => {
-  // All cards with streak 7 and above, are treated the same for weight
-  const clippedStreak = Math.min(card.streak, 7);
+const getTargetForLesson = () => {
+  let targetStreak: number | null = null;
+  while (targetStreak === null) {
+    /**
+     * Think of this like a sieve. We descend down the layers of the sieve,
+     * with a 50% chance of stopping at each layer. This has the overall
+     * effect of making each target a half as likely as its predecessor.
+     */
+    targetStreak =
+      Math.random() < 0.5
+        ? 0
+        : Math.random() < 0.5
+        ? 1
+        : Math.random() < 0.5
+        ? 2
+        : Math.random() < 0.5
+        ? 3
+        : Math.random() < 0.5
+        ? 4
+        : Math.random() < 0.5
+        ? 5
+        : Math.random() < 0.5
+        ? 6
+        : Math.random() < 0.5
+        ? 7
+        : null;
+  }
+  return targetStreak;
+};
 
-  // This assigns weight 0 to max streak cards, and one more weight to each level below that.
-  // Runs from 0 to 7.
-  const linearWeight = 7 - clippedStreak;
+const getNextQuizCard = (cards: StatefulCard[]): StatefulCard => {
+  let quizCard: StatefulCard | undefined;
+  while (quizCard === undefined) {
+    const targetStreak = getTargetForLesson();
+    // Try to pick a random card with the target streak
+    quizCard = pickRandom(
+      cards.filter((card) =>
+        // Cards with streak greater than 7 are treated as being at target 7
+        card.streak > 7
+          ? targetStreak === 7
+          : card.streak === targetStreak
+      )
+      // It could be that the target is empty, in which case we'll get undefined here
+      // and that's ok, it'll just run the loop again with a new random target
+    );
+  }
+  return quizCard;
+};
 
-  // This assigns weight in a doubling fashion. A card with streak 1 has double the weight of a card with streak 2.
-  const exponentialWeight = 2 ** linearWeight;
-  return { card, weight: exponentialWeight };
+const getWrongAnswers = (
+  cards: StatefulCard[],
+  quizCard: StatefulCard
+): Lesson["wrongAnswers"] => {
+  const [wrong1, wrong2, wrong3] = sortBy(
+    cards.filter((card) => card.question !== quizCard.question),
+    // Sort cards by proximity to correct answer, with a little randomness for fun.
+    (card) => Math.abs(card.streak - quizCard.streak) + Math.random()
+  ).map(({ answer }) => answer);
+  return [wrong1, wrong2, wrong3];
 };
 
 export const getLesson = (cards: StatefulCard[]): Lesson => {
-  /**
-   * Imagine all the cards taking up "space" according to their weight.
-   *
-   * This algo picks a random point in that space, and advances a pointer,
-   * until it finds the element that spans that point.
-   *
-   * Since "heavier" elements take up more "space", they are more likely to be picked.
-   */
-  const weightedCards = shuffle(cards.map(toWeightedCard));
-  const totalWeight = weightedCards
-    .map(({ weight }) => weight)
-    .reduce((acc, curr) => acc + curr);
-
-  let weightRemaining = Math.random() * totalWeight;
-  let searchPointer = 0;
-  while (weightedCards[searchPointer].weight < weightRemaining) {
-    weightRemaining -= weightedCards[searchPointer].weight;
-    searchPointer++;
-  }
-  const quizCard = weightedCards[searchPointer].card;
-
-  // Next up, we need to find our wrong answers
-  const otherCards = cards.filter(
-    (card) => card.question !== quizCard.question
-  );
-
-  // Find three wrong answers
-  const [wrong1, wrong2, wrong3] = otherCards
-    .map((card) => ({
-      card,
-      // Sort cards by proximity to correct answer, with a little randomness for fun.
-      rank: Math.abs(card.streak - quizCard.streak) + Math.random(),
-    }))
-    .sort((a, b) => a.rank - b.rank)
-    .map(({ card: { answer } }) => answer);
+  const quizCard = getNextQuizCard(cards);
 
   return {
     quizCard,
-    wrongAnswers: [wrong1, wrong2, wrong3],
+    wrongAnswers: getWrongAnswers(cards, quizCard),
   };
 };
 
@@ -100,12 +105,7 @@ export const completeLesson = (
     submittedAnswer.toLocaleLowerCase() ===
     quizCard.answer.toLocaleLowerCase();
 
-  const updatedQuizCard: StatefulCard = {
-    ...quizCard,
-    streak: isCorrectAnswer ? quizCard.streak + 1 : 0,
-  };
-
-  const updatedCards = cards.map((card) => {
+  const updatedCards = cards.map((card: StatefulCard) => {
     // Update the quiz card
     if (card.question === quizCard.question) {
       return {
@@ -123,8 +123,8 @@ export const completeLesson = (
     return card;
   });
 
-  // Avoid showing the same quiz card twice in a row
   const nextLesson = getLesson(
+    // Avoid showing the same quiz card twice in a row
     updatedCards.filter((card) => card.question !== quizCard.question)
   );
 
