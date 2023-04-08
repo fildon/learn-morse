@@ -22,7 +22,7 @@ export type StatefulCard = BareCard & {
    * Initially the learner is shown only a few cards over and over again,
    * this way they are not overwhelmed.
    * But gradually more cards are pulled into rotation.
-   * 
+   *
    * A card is "ready" before it is in rotation.
    * A card is "active" when it is in rotation.
    */
@@ -36,9 +36,13 @@ const isUnknownObject = (
 
 export const isStatefulCard = (x: unknown): x is StatefulCard =>
   isUnknownObject(x) &&
+  // BareCard properties
   typeof x.question === "string" &&
   typeof x.answer === "string" &&
-  typeof x.streak === "number";
+  (x.tag === "morseToText" || x.tag === "textToMorse") &&
+  // StatefulCard properties
+  typeof x.streak === "number" &&
+  (x.stage === "ready" || x.stage === "active");
 
 export const allCards: BareCard[] = [
   // Morse to Text

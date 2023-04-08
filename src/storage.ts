@@ -15,16 +15,27 @@ const initializeCard = (card: BareCard): StatefulCard => ({
 const initializeCards = (): StatefulCard[] =>
   shuffle(allCards.map(initializeCard));
 
+const VERSION = "1";
+
 /**
  * Read and write to localStorage, but with explicit dependency injection
  */
 export const createStorageModule = ({
+  clear,
   getItem,
   setItem,
-}: Pick<Storage, "getItem" | "setItem">) => ({
+}: Pick<Storage, "clear" | "getItem" | "setItem">) => ({
   writeStatefulCardsToStore: (cards: StatefulCard[]): void =>
     setItem("cards", JSON.stringify(cards)),
   readStatefulCardsFromStore: (): StatefulCard[] => {
+    const storedVersion = getItem("version");
+    // If the stored version is out of date, we clear the store.
+    if (storedVersion !== VERSION) {
+      clear();
+      setItem("version", VERSION);
+      return initializeCards();
+    }
+
     const stored = getItem("cards");
 
     // Nothing found in storage
@@ -45,7 +56,7 @@ export const createStorageModule = ({
       console.error(
         `Found corrupted data in localStorage. The storage will now be cleared. The corrupted data were: ${stored}`
       );
-      localStorage.clear();
+      clear();
       return initializeCards();
     }
   },

@@ -18,6 +18,7 @@ const progress = document.getElementById(
 
 // Prepare mutable state
 const storageModule = createStorageModule({
+  clear: () => window.localStorage.clear(),
   getItem: (key) => window.localStorage.getItem(key),
   setItem: (key, value) => window.localStorage.setItem(key, value),
 });
