@@ -11,10 +11,7 @@ import { shuffle } from "./utils";
 // Find interactive elements
 const queryDisplay = document.getElementById("question")!;
 const buttons = document.getElementsByTagName("button");
-const previousResult = document.getElementById("previousResult")!;
 const feedback = document.getElementById("feedback")!;
-const previousQuestion = document.getElementById("previousQuestion")!;
-const previousAnswer = document.getElementById("previousAnswer")!;
 const progress = document.getElementById(
   "progress"
 ) as HTMLProgressElement;
@@ -41,19 +38,6 @@ const renderLesson = ({ quizCard, wrongAnswers }: Lesson): void => {
   buttons[3].textContent = d;
 };
 
-const renderPreviousResult = (
-  { question, answer }: BareCard,
-  feedbackMessage: string
-) => {
-  // The element is initially display: none since there is nothing to display
-  // So we have to ensure that it is revealed in order to show anything
-  previousResult.style.display = "block";
-
-  feedback.textContent = feedbackMessage;
-  previousQuestion.textContent = question;
-  previousAnswer.textContent = answer;
-};
-
 const renderProgress = (cards: StatefulCard[]) => {
   const progressValue = getLearningProgress(cards);
   progress.value = progressValue * 100;
@@ -68,8 +52,8 @@ const submitAnswer = (answer: BareCard["answer"]) => {
     completeLesson(currentCards, currentLesson.quizCard, answer);
 
   // Update UI
+  feedback.textContent = feedbackMessage;
   renderLesson(nextLesson);
-  renderPreviousResult(currentLesson.quizCard, feedbackMessage);
   renderProgress(updatedCards);
 
   // Update in memory state

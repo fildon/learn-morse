@@ -13,18 +13,19 @@
   <body>
     <h1>Learn Morse</h1>
     <main>
-      <p id="question" class="morse"></p>
+      <p id="feedback" class="morse">
+        Welcome to Learn Morse! Click the button that matches the text
+        shown above them.
+      </p>
+      <section id="questionContainer">
+        <p>What is this?</p>
+        <p id="question" class="morse"></p>
+      </section>
       <section id="buttonContainer">
         <button></button>
         <button></button>
         <button></button>
         <button></button>
-      </section>
-      <section id="previousResult" style="display: none">
-        <p id="feedback"></p>
-        <span id="previousQuestion" class="morse"></span>
-        <span>is</span>
-        <span id="previousAnswer"></span>
       </section>
     </main>
     <label style="display: block"

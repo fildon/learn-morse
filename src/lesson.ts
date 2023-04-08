@@ -1,5 +1,5 @@
 import { type StatefulCard, type BareCard } from "./card";
-import { pickRandom, shuffle, sortBy } from "./utils";
+import { pickRandom, sortBy } from "./utils";
 
 /**
  * A single lesson. Typically the current lesson.
@@ -55,13 +55,16 @@ const getNextQuizCard = (cards: StatefulCard[]): StatefulCard => {
     const targetStreak = getTargetForLesson();
     // Try to pick a random card with the target streak
     quizCard = pickRandom(
-      cards.filter((card) =>
-        // Cards with streak greater than 7 are treated as being at target 7
-        card.streak > 7
-          ? targetStreak === 7
-          : card.streak === targetStreak
-      )
-      // It could be that the target is empty, in which case we'll get undefined here
+      cards.filter(
+        (card) =>
+          card.stage === "active" &&
+          // Cards with streak greater than 7 are treated as being at target 7
+          card.streak > 7
+            ? targetStreak === 7
+            : card.streak === targetStreak
+        // If we can't find a card in the target, then we'll pull in a new ready card
+      ) ?? pickRandom(cards.filter((card) => card.stage === "ready"))
+      // It could be there are no ready cards, in which case we'll get undefined here
       // and that's ok, it'll just run the loop again with a new random target
     );
   }
@@ -75,8 +78,7 @@ const getWrongAnswers = (
   const [wrong1, wrong2, wrong3] = sortBy(
     cards.filter(
       (card) =>
-        card.question !== quizCard.question &&
-        card.tag === quizCard.tag
+        card.answer !== quizCard.answer && card.tag === quizCard.tag
     ),
     // Sort cards by proximity to correct answer, with a little randomness for fun.
     (card) => Math.abs(card.streak - quizCard.streak) + Math.random()
@@ -109,35 +111,54 @@ export const completeLesson = (
     submittedAnswer.toLocaleLowerCase() ===
     quizCard.answer.toLocaleLowerCase();
 
-  const updatedCards = cards.map((card: StatefulCard) => {
-    // Update the quiz card
-    if (card.question === quizCard.question) {
-      return {
-        ...quizCard,
-        streak: isCorrectAnswer ? quizCard.streak + 1 : 0,
-      };
-    }
+  const updatedCards = cards.map(
+    (card: StatefulCard): StatefulCard => {
+      // Update the quiz card
+      if (card.question === quizCard.question) {
+        return {
+          ...quizCard,
+          streak: isCorrectAnswer ? quizCard.streak + 1 : 0,
+          stage: "active",
+        };
+      }
 
-    // If the submitted answer was wrong, we also reset the streak on the card matching the submitted answer.
-    if (!isCorrectAnswer && card.answer === submittedAnswer) {
-      return { ...card, streak: 0 };
-    }
+      // If the submitted answer was wrong, we also reset the streak on the card matching the submitted answer.
+      if (
+        !isCorrectAnswer &&
+        [card.question, card.answer].includes(submittedAnswer)
+      ) {
+        return { ...card, streak: 0 };
+      }
 
-    // Otherwise, no need to update this card
-    return card;
-  });
+      // Otherwise, no need to update this card
+      return card;
+    }
+  );
 
   const nextLesson = getLesson(
-    // Avoid showing the same quiz card twice in a row
-    updatedCards.filter((card) => card.question !== quizCard.question)
+    updatedCards.filter(
+      (card) =>
+        // Avoid showing the same quiz card twice in a row
+        ![
+          quizCard.question,
+          quizCard.answer,
+          submittedAnswer,
+        ].includes(card.question) &&
+        ![
+          quizCard.question,
+          quizCard.answer,
+          submittedAnswer,
+        ].includes(card.answer)
+    )
   );
 
   return {
     updatedCards,
     nextLesson,
     feedbackMessage: isCorrectAnswer
-      ? "Yes!"
-      : `No. Not: "${submittedAnswer.toLocaleUpperCase()}"`,
+      ? `Yes! "${quizCard.question}" is "${quizCard.answer}"`
+      : `No. "${quizCard.question}" is "${quizCard.answer}",
+        not: "${submittedAnswer.toLocaleUpperCase()}"`,
   };
 };
 

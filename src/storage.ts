@@ -9,6 +9,7 @@ import { shuffle } from "./utils";
 const initializeCard = (card: BareCard): StatefulCard => ({
   ...card,
   streak: 0,
+  stage: "ready",
 });
 
 const initializeCards = (): StatefulCard[] =>

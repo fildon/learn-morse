@@ -17,6 +17,16 @@ export type StatefulCard = BareCard & {
    * Any incorrect answer resets this to zero
    */
   streak: number;
+  /**
+   * Not all cards are in "rotation" at the same time.
+   * Initially the learner is shown only a few cards over and over again,
+   * this way they are not overwhelmed.
+   * But gradually more cards are pulled into rotation.
+   * 
+   * A card is "ready" before it is in rotation.
+   * A card is "active" when it is in rotation.
+   */
+  stage: "ready" | "active";
 };
 
 const isUnknownObject = (

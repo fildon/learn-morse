@@ -1,9 +1,35 @@
 * {
   line-height: 1.3;
+  box-sizing: border-box;
+}
+
+html {
+  display: flex;
+  justify-content: center;
+}
+
+body {
+  width: 50ch;
 }
 
 body > * + * {
   margin-block-start: 1em;
+}
+
+main > * + * {
+  margin-block-start: 1em;
+}
+
+#feedback {
+  height: 4em;
+  overflow: scroll;
+}
+
+#questionContainer {
+  padding: 1em;
+  border: 1ch solid black;
+  text-align: center;
+  width: 100%;
 }
 
 #question {
