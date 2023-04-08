@@ -93,6 +93,7 @@ renderProgress(currentCards);
 
 document.addEventListener("keyup", ({ key }) => {
   if (
+    currentLesson.quizCard.tag === "morseToText" &&
     allCards.some(
       (card) =>
         card.answer.toLocaleLowerCase() === key.toLocaleLowerCase()
