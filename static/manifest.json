@@ -1,0 +1,6 @@
+{
+  "name": "Learn Morse",
+  "icons": [{ "src": "learnmorse.png", "sizes": "48x48" }],
+  "start_url": "https://fildon.me/learn-morse",
+  "display": "standalone"
+}
