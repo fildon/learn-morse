@@ -1,7 +1,7 @@
 {
   "scripts": {
     "build:static": "shx cp -r static/. dist",
-    "build:src": "esbuild src/index.ts --bundle --minify --outfile=dist/index.js",
+    "build:src": "esbuild src/index.ts src/serviceWorker.ts --bundle --minify --outdir=dist",
     "build": "npm run build:static && npm run build:src"
   },
   "dependencies": {
